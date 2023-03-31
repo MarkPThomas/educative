@@ -25,5 +25,5 @@ export function jumpGame(nums) {
       target = i;
     }
   }
-  return nums[target] === nums[0];
+  return target === 0;
 }
