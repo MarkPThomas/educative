@@ -21,7 +21,6 @@ export function jumpGame(nums) {
   let target = nums.length - 1;
 
   for (let i = nums.length - 2; i >= 0; i--) {
-    console.log('nums[i]: ', nums[i]);
     if (i + nums[i] >= target) {
       target = i;
     }
