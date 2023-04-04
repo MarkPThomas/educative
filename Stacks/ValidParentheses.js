@@ -16,6 +16,8 @@
 
 // The string will only contain the following characters: (, ), [, ], { and }.
 
+// T: O(n)
+// S: O(n)
 export function isValid(string) {
   const openings = {
     '(': ')',
