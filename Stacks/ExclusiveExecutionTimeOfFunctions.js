@@ -15,6 +15,10 @@ import { Log } from "./log.js";
 // Tip: You may use some of the code templates provided
 // in the support files
 
+// Assuming m = # of events, n = # of integers in ID, t = # of integers in time
+// log10(n) for parsing ID, log10(t) for parsing time
+// T: O(m * (log(n) + log(t))) = O(m * log(n)) assuming t is a constant
+// S: O(m/2) = O(m)
 export function exclusiveTime(n, events) {
   const runtimes = new Array(n).fill(0);
   const eventStack = [];
