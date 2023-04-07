@@ -7,6 +7,8 @@
 
 // You need to return the minimum number of boats to carry every person in the array.
 
+// T: O(n * log(n))
+// S: O(1)
 export function rescueBoats(people, limit) {
   let boats = 0;
 

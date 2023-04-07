@@ -17,6 +17,8 @@
 
 // If the player can reach the last index, your function returns TRUE; otherwise, it returns FALSE.
 
+// T: O(n)
+// S: O(1)
 export function jumpGame(nums) {
   let target = nums.length - 1;
 
