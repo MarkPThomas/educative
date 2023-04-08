@@ -63,7 +63,7 @@ class Trie {
     let node = this.root;
 
     for (let i = 0; i < prefix.length; i++) {
-      const char = word[i];
+      const char = prefix[i];
       if (!node.children[char]) {
         const remainingBlank = Array(prefix.length - i).fill([]);
         return [...suggestions, ...remainingBlank];
