@@ -16,9 +16,9 @@ export function fractionToDecimal(numerator, denominator) {
     denominator = Math.abs(denominator);
   }
 
-  let remainder = (numerator % denominator) * 10;
   let quotient = Math.floor(numerator / denominator);
   result += quotient.toString();
+  let remainder = (numerator % denominator) * 10;
   if (remainder === 0) {
     return result;
   }
@@ -30,7 +30,7 @@ export function fractionToDecimal(numerator, denominator) {
       result = updateWithRepeating(result, remainders[remainder]);
       break;
     } else {
-      remainders[remainder] = remainder.toString().length;
+      remainders[remainder] = result.length;
 
       quotient = Math.floor(remainder / denominator);
       result += quotient;
@@ -42,12 +42,6 @@ export function fractionToDecimal(numerator, denominator) {
 }
 
 function updateWithRepeating(result, beginning) {
-  if (result[0] !== '0') {
-    beginning++;
-  }
-  if (result[0] === '-' && result[1] !== '0') {
-    beginning++;
-  }
   const left = result.slice(0, beginning);
   const right = result.slice(beginning);
   return left + '(' + right + ')';
