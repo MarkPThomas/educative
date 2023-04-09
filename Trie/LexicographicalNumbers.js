@@ -29,11 +29,10 @@ class Trie {
   // T: O(n)
   // S: O(n)
   generateTo(n) {
-    let node = this.root;
     let factor = 1;
     let i = 1;
     while (i <= n) {
-      node = this.root;
+      let node = this.root;
 
       // Get node for correct base multiple
       if (i >= factor * this.BASE) {
