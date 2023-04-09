@@ -11,7 +11,7 @@ export function lexicographicalOrder(n, base = 10) {
   const lexiNums = new Trie(base);
   lexiNums.generateTo(n);               // T: O(n), S: O(n)
 
-  return lexiNums.inOrderTraversal();   // T: O(n), S: O(m)
+  return lexiNums.preOrderTraversal();   // T: O(n), S: O(m)
 }
 
 class TrieNode {
@@ -63,18 +63,18 @@ class Trie {
   // T: O(n)
   // S: O(m)
   // where n = max # specified, m = order of magnitude of max #, coincides with trie depth for recursion stack
-  inOrderTraversal() {
+  preOrderTraversal() {
     const numbers = [];
 
-    this.inOrderTraversalRecursion(this.root, numbers);
+    this.preOrderTraversalRecursion(this.root, numbers);
 
     return numbers;
   }
 
-  inOrderTraversalRecursion(node, numbers) {
+  preOrderTraversalRecursion(node, numbers) {
     for (const key in node.children) {
       numbers.push(parseInt(key));
-      this.inOrderTraversalRecursion(node.children[key], numbers);
+      this.preOrderTraversalRecursion(node.children[key], numbers);
     }
   }
 }
