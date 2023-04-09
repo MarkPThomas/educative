@@ -7,6 +7,9 @@
 
 // Return the minimum cost to fly every person to a city such that exactly n people arrive in each city.
 
+// T: O(n * log(n))
+// S: O(1)
+// where n = # costs
 export function twoCityScheduling(costs) {
   const costDifferences = [];
   for (let i = 0; i < costs.length; i++) {
