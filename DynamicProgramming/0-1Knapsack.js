@@ -35,6 +35,7 @@ export function findMaxKnapSackProfit(capacity, weights, values) {
         // Maintain current profit at max allowable state
         profits[currentCapacity] = Math.max(profits[currentCapacity], currentProfit);
       }
+      break;
     }
   }
 
