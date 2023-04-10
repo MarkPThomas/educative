@@ -20,23 +20,26 @@
 
 // If the car reaches the target with 0 fuel left, it is still considered to have arrived.
 
+// Note: Initial variable names & terminology were confusing. I tweaked things.
+//  For starters, rather than worrying about distance vs. fuel, since car gets 1 mi / 1 liter,
+//  I just talk in terms of range ranter than leaving conversion of fuel:distance in mind.
+
 // T: O(n^2)
 // S: O(n)
-export function minRefuelSteps(target, startFuel, stations) {
+export function minRefuelSteps(targetDistance, initialRange, stations) {
   const maxDistancesByStation = new Array(stations.length + 1).fill(0);
-  maxDistancesByStation[0] = startFuel;
+  maxDistancesByStation[0] = initialRange;
 
   for (let i = 0; i < stations.length; i++) {
-    const stationDistance = stations[i][0];
-    const stationFuel = stations[i][1];
+    const [distanceToReach, distanceAddedFromStop] = stations[i];
 
     for (let j = i; j >= 0; j--) {
       // If station distance at this step <= max distance reachable at this step, consider it.
-      if (stationDistance <= maxDistancesByStation[j]) {
+      if (distanceToReach <= maxDistancesByStation[j]) {
         // Current step, j, is for if all stations were visited up to the station considered.
         // Working backwards updates prior steps to max distance if ordering of multiple reachable
         //   stations at that step is changed such that distance is increased.
-        const nextDistanceWithCurrentStation = maxDistancesByStation[j] + stationFuel;
+        const nextDistanceWithCurrentStation = maxDistancesByStation[j] + distanceAddedFromStop;
         const currentNextDistance = maxDistancesByStation[j + 1];
         maxDistancesByStation[j + 1] = Math.max(currentNextDistance, nextDistanceWithCurrentStation);
       }
@@ -46,7 +49,7 @@ export function minRefuelSteps(target, startFuel, stations) {
   // With optimal ordering of stations/step for max distance/station visited
   //   choose fewest steps to reach target
   for (let i = 0; i <= stations.length; i++) {
-    if (target <= maxDistancesByStation[i]) {
+    if (targetDistance <= maxDistancesByStation[i]) {
       return i;
     }
   }

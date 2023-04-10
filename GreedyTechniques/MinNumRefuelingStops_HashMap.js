@@ -22,11 +22,15 @@
 
 import { MaxHeap } from "./maxHeap";
 
+// Note: Initial variable names & terminology were confusing. I tweaked things.
+//  For starters, rather than worrying about distance vs. fuel, since car gets 1 mi / 1 liter,
+//  I just talk in terms of range ranter than leaving conversion of fuel:distance in mind.
+
 // T: O(n * log(n))
 // S: O(n)
 // where n = # stations
-function minRefuelStops(target, startFuel, stations) {
-    if (startFuel >= target) {
+function minRefuelStops(targetDistance, initialRange, stations) {
+    if (initialRange >= targetDistance) {
         return 0;
     }
 
@@ -34,21 +38,20 @@ function minRefuelStops(target, startFuel, stations) {
 
     let station = 0;
     let stops = 0;
-    let maxDistance = startFuel;
+    let currentRange = initialRange;
     // Consider all stations in current range, then stop at station that gives greatest additional range
     // Repeat until target reached or we run out of gas.
-    while (maxDistance < target) {
-        // station[0] = distanceToStation
-        // station[1] ~ nextDistanceFromStation as = fuelAvailable @ 1:1 mpg
-        if (station < stations.length && stations[station][0] <= maxDistance) {
-            maxDistanceFromStopsAvailable.push(stations[station][1]);
+    while (currentRange < targetDistance) {
+        const [distanceToReach, distanceAddedFromStop] = stations[station];
+        if (station < stations.length && distanceToReach <= currentRange) {
+            maxDistanceFromStopsAvailable.push(distanceAddedFromStop);
             station++;
         }
-        else if (maxDistanceFromStopsAvailable.isEmpty() === 0) {
+        else if (maxDistanceFromStopsAvailable.isEmpty()) {
             return -1;
         }
         else {
-            maxDistance += maxDistanceFromStopsAvailable.pop();
+            currentRange += maxDistanceFromStopsAvailable.pop();
             stops++;
         }
     }
