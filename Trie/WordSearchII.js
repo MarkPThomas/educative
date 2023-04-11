@@ -7,13 +7,9 @@
 // The solution should return a list containing the strings from the input list that were found in the grid.
 
 // Constraints:
-
 // 1 ≤ rows, columns ≤ 12
-
 // 1 ≤ words.length ≤ 3×10^3
-
 // 1 ≤ words[i].length ≤ 10
-
 // All the strings of words are unique.
 
 // Note: The order of the strings in the output does not matter.
@@ -66,8 +62,7 @@ function search(node, grid, coord, words, word = '') {
           col: col + offset.col
         }
 
-        search(child, grid, nextCoord, words, word
-        );
+        search(child, grid, nextCoord, words, word);
       });
 
       // Reset coord state as path search backtracks
