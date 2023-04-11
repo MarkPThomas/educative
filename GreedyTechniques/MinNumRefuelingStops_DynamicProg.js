@@ -26,22 +26,22 @@
 
 // T: O(n^2)
 // S: O(n)
-export function minRefuelSteps(targetDistance, initialRange, stations) {
-  const maxDistancesByStation = new Array(stations.length + 1).fill(0);
-  maxDistancesByStation[0] = initialRange;
+export function minRefuelStops(targetDistance, initialRange, stations) {
+  const rangeWithNStops = new Array(stations.length + 1).fill(0);
+  rangeWithNStops[0] = initialRange;
 
   for (let i = 0; i < stations.length; i++) {
-    const [distanceToReach, distanceAddedFromStop] = stations[i];
+    const [distanceToReach, rangeAdded] = stations[i];
 
     for (let j = i; j >= 0; j--) {
       // If station distance at this step <= max distance reachable at this step, consider it.
-      if (distanceToReach <= maxDistancesByStation[j]) {
+      if (distanceToReach <= rangeWithNStops[j]) {
         // Current step, j, is for if all stations were visited up to the station considered.
         // Working backwards updates prior steps to max distance if ordering of multiple reachable
         //   stations at that step is changed such that distance is increased.
-        const nextDistanceWithCurrentStation = maxDistancesByStation[j] + distanceAddedFromStop;
-        const currentNextDistance = maxDistancesByStation[j + 1];
-        maxDistancesByStation[j + 1] = Math.max(currentNextDistance, nextDistanceWithCurrentStation);
+        const rangeWithCurrentStop = rangeWithNStops[j] + rangeAdded;
+        const rangeWithNextStop = rangeWithNStops[j + 1];
+        rangeWithNStops[j + 1] = Math.max(rangeWithNextStop, rangeWithCurrentStop);
       }
     }
   }
@@ -49,7 +49,7 @@ export function minRefuelSteps(targetDistance, initialRange, stations) {
   // With optimal ordering of stations/step for max distance/station visited
   //   choose fewest steps to reach target
   for (let i = 0; i <= stations.length; i++) {
-    if (targetDistance <= maxDistancesByStation[i]) {
+    if (targetDistance <= rangeWithNStops[i]) {
       return i;
     }
   }
