@@ -34,7 +34,7 @@ class LFUCache {
   constructor(capacity) {
     this.capacity = capacity;
     this.length = 0;
-    this.keyValueMap = {}; // int:__,  key:value
+    this.keyValueMap = {}; // int:Node,  key:node
     this.keyCountMap = {}; // int:int, key:count
     this.countLruMap = {}; // int:LL,  count:LLhead
   }
@@ -53,8 +53,8 @@ class LFUCache {
   // S: O(1)
   put(key, value) {
     if (key in this.keyCountMap) {
-      this.updateCount(key);
-      this.setValue(key, value);
+      const updatedNode = this.updateCount(key);
+      this.setValue(updatedNode);
     } else {
       if (this.length > 0 && this.length === this.capacity) {
         this.removeLFU();
@@ -84,7 +84,7 @@ class LFUCache {
   updateCount(key) {
     const updatedNode = this.removeFromCountLruMap(key);
     this.keyCountMap[key]++;
-    this.addToCountLruMap(key, this.keyCountMap[key]);
+    this.addToCountLruMap(updatedNode, this.keyCountMap[key]);
     return updatedNode;
   }
 
@@ -104,20 +104,20 @@ class LFUCache {
   // T: O(1)
   // S: O(1)
   add(key, value, count = 1) {
-    this.keyValueMap[key] = value;
     this.keyCountMap[key] = count;
-    this.addToCountLruMap(key, count);
+    const node = this.addToCountLruMap({ key, value }, count);
+    this.keyValueMap[key] = node;
 
     this.length++;
   }
 
   // T: O(1)
   // S: O(1)
-  addToCountLruMap(key, count) {
+  addToCountLruMap(data, count) {
     if (!this.countLruMap[count]) {
       this.countLruMap[count] = new LinkedList();
     }
-    this.countLruMap[count].addToHead(new LinkedListNode(key))
+    return this.countLruMap[count].addToHead(data);
   }
 
   // T: O(n)
@@ -125,15 +125,15 @@ class LFUCache {
   remove(key) {
     delete this.keyValueMap[key];
     delete this.keyCountMap[key];
-    const evictedNode = this.removeFromCountLruMap(key);
+    const evictedNode = this.removeFromCountLruMap(key); // T: O(n)
 
     return evictedNode;
   }
 
-  // T: O(n)
+  // T: O(1)
   // S: O(1)
   removeLfuFromCountLruMap(count) {
-    const evictedNode = this.countLruMap[count].removeTail(); // T: O(n)
+    const evictedNode = this.countLruMap[count].removeTail(); // T: O(1)
     this.removeCountLruMapEntryIfEmpty(count);
     return evictedNode;
   }
@@ -155,35 +155,42 @@ class LFUCache {
   }
 
   getValue(key) {
-    return this.keyValueMap[key];
+    return this.keyValueMap[key].value;
   }
 
-  setValue(key, value) {
-    this.keyValueMap[key] = value;
+  setValue(node) {
+    this.keyValueMap[node.key] = node;
   }
 }
 
 class LinkedListNode {
-  constructor(key, next = null) {
-    this.key = key;
+  constructor(data, next = null, prev = null) {
+    this.key = data.key;
+    this.value = data.value;
     this.next = next;
+    this.prev = prev;
   }
 }
 
 class LinkedList {
   constructor() {
     this.head = null;
+    this.tail = null;
   }
 
   // T: O(1)
   // S: O(1)
-  addToHead(node) {
+  addToHead(data) {
+    const node = new LinkedListNode(data);
     if (this.head === null) {
       this.head = node;
+      this.tail = node;
     } else {
       node.next = this.head;
+      node.next.prev = node;
       this.head = node;
     };
+    return node;
   }
 
   // T: O(1)
@@ -193,10 +200,30 @@ class LinkedList {
     if (node) {
       if (node.next) {
         this.head = node.next;
+        this.head.prev = null;
         node.next = null;
       } else {
         // Only node in list
         this.head = null;
+        this.tail = null;
+      }
+      return node;
+    }
+  }
+
+  // T: O(1)
+  // S: O(1)
+  removeTail() {
+    const node = this.tail;
+    if (node) {
+      if (node.prev) {
+        this.tail = node.prev;
+        this.tail.next = null;
+        node.prev = null;
+      } else {
+        // Only node in list
+        this.head = null;
+        this.tail = null;
       }
       return node;
     }
@@ -204,48 +231,16 @@ class LinkedList {
 
   // T: O(n)
   // S: O(1)
-  removeTail() {
-    let node = this.head;
-    if (node) {
-      let nextNode = node.next;
-      if (nextNode) {
-        while (nextNode.next) {
-          node = node.next;
-          nextNode = nextNode.next;
-        }
-        node.next = null;
-        return nextNode;
-      } else {
-        // Only node in list
-        this.head = null;
-        return node;
-      }
-    }
-  }
-
-
-
-  // T: O(n)
-  // S: O(1)
-  getNode(key) {
-    let node = this.head;
-    while (node && node.key !== key) {
-      node = node.next;
-    }
-    return node;
-  }
-
-  // T: O(n)
-  // S: O(1)
   removeNode(key) {
+    if (this.head.key === key) {
+      return this.removeHead();
+    }
+    if (this.tail.key === key) {
+      return this.removeTail();
+    }
+
     let node = this.head;
     if (node) {
-      if (node.key === key) {
-        this.head = node.next;
-        node.next = null
-        return node;
-      }
-
       let nextNode = node.next;
       if (nextNode) {
         while (nextNode.key !== key && nextNode.next) {
@@ -253,7 +248,10 @@ class LinkedList {
           nextNode = nextNode.next;
         }
         node.next = nextNode.next;
+        nextNode.next.prev = node;
+
         nextNode.next = null;
+        nextNode.prev = null;
         return nextNode;
       }
     }
