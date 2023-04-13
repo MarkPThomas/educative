@@ -57,7 +57,7 @@ class LFUCache {
       this.setValue(updatedNode);
     } else {
       if (this.length > 0 && this.length === this.capacity) {
-        this.removeLFU();
+        this.removeLFU(); // T: O(n)
       }
       this.add(key, value);
     }
@@ -120,12 +120,12 @@ class LFUCache {
     return this.countLruMap[count].addToHead(data);
   }
 
-  // T: O(n)
+  // T: O(1)
   // S: O(1)
   remove(key) {
     delete this.keyValueMap[key];
     delete this.keyCountMap[key];
-    const evictedNode = this.removeFromCountLruMap(key); // T: O(n)
+    const evictedNode = this.removeFromCountLruMap(key); // T: O(1)
 
     return evictedNode;
   }
@@ -138,11 +138,11 @@ class LFUCache {
     return evictedNode;
   }
 
-  // T: O(n)
+  // T: O(1)
   // S: O(1)
   removeFromCountLruMap(nodeKey) {
     const count = this.keyCountMap[nodeKey];
-    const evictedNode = this.countLruMap[count].removeNode(nodeKey)  // T: O(n)
+    const evictedNode = this.countLruMap[count].removeNode(nodeKey)  // T: O(1)
     this.removeCountLruMapEntryIfEmpty(count);
     return evictedNode;
   }
@@ -229,32 +229,22 @@ class LinkedList {
     }
   }
 
-  // T: O(n)
+  // T: O(1)
   // S: O(1)
-  removeNode(key) {
-    if (this.head.key === key) {
+  removeNode(node) {
+    if (this.head.key === node.key) {
       return this.removeHead();
     }
-    if (this.tail.key === key) {
+    if (this.tail.key === node.key) {
       return this.removeTail();
     }
 
-    let node = this.head;
-    if (node) {
-      let nextNode = node.next;
-      if (nextNode) {
-        while (nextNode.key !== key && nextNode.next) {
-          node = node.next;
-          nextNode = nextNode.next;
-        }
-        node.next = nextNode.next;
-        nextNode.next.prev = node;
+    node.prev.next = node.next;
+    node.next = node.prev;
 
-        nextNode.next = null;
-        nextNode.prev = null;
-        return nextNode;
-      }
-    }
+    node.next = null;
+    node.prev = null;
+    return node;
   }
 }
 
