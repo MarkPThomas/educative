@@ -56,7 +56,7 @@ class LFUCache {
       this.setValue(key, value);
     } else {
       if (this.length > 0 && this.length === this.capacity) {
-        this.removeLFU();
+        this.removeLFU(); // T: O(n)
       }
       this.add(key, value);
     }
