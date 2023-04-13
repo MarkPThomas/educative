@@ -36,6 +36,7 @@ class LFUCache {
     this.length = 0;
     this.keyValueMap = {}; // int:__,  key:value
     this.keyCountMap = {}; // int:int, key:count
+    this.countLruMap = {}; // int:LL,  count:LLhead
   }
 
   // T: O(1)
@@ -66,32 +67,38 @@ class LFUCache {
   // S: O(1)
   // where n = # of items cached
   removeLFU() {
-    // LFU items, although ties are not handled
-    const evictKey = this.getEvictKey(); // T: O(n)
-    if (evictKey !== undefined) {
-      return this.remove(evictKey);
+    // LFU items, ties are handled through LRU
+    const minCount = this.getMinCount(); // T: O(n)
+    if (minCount !== Infinity) {
+      const evictedNode = this.removeLfuFromCountLruMap(minCount);
+      delete this.keyValueMap[evictedNode.key];
+      delete this.keyCountMap[evictedNode.key];
+
+      this.length--;
+      return evictedNode;
     }
   }
 
   // T: O(1)
   // S: O(1)
   updateCount(key) {
+    const updatedNode = this.removeFromCountLruMap(key);
     this.keyCountMap[key]++;
+    this.addToCountLruMap(key, this.keyCountMap[key]);
+    return updatedNode;
   }
 
   // T: O(n)
   // S: O(1)
   // where n = # of items cached
-  getEvictKey() {
+  getMinCount() {
     let min = Infinity;
-    let minCountKey;
     for (const key in this.keyCountMap) {
       if (this.keyCountMap[key] < min) {
         min = this.keyCountMap[key];
-        minCountKey = key;
       }
     }
-    return minCountKey;
+    return min;
   }
 
   // T: O(1)
@@ -99,17 +106,52 @@ class LFUCache {
   add(key, value, count = 1) {
     this.keyValueMap[key] = value;
     this.keyCountMap[key] = count;
+    this.addToCountLruMap(key, count);
+
     this.length++;
   }
 
   // T: O(1)
   // S: O(1)
+  addToCountLruMap(key, count) {
+    if (!this.countLruMap[count]) {
+      this.countLruMap[count] = new LinkedList();
+    }
+    this.countLruMap[count].addToHead(new LinkedListNode(key))
+  }
+
+  // T: O(n)
+  // S: O(1)
   remove(key) {
-    const value = this.keyValueMap[key];
     delete this.keyValueMap[key];
     delete this.keyCountMap[key];
-    this.length--;
-    return [key, value];
+    const evictedNode = this.removeFromCountLruMap(key);
+
+    return evictedNode;
+  }
+
+  // T: O(n)
+  // S: O(1)
+  removeLfuFromCountLruMap(count) {
+    const evictedNode = this.countLruMap[count].removeTail(); // T: O(n)
+    this.removeCountLruMapEntryIfEmpty(count);
+    return evictedNode;
+  }
+
+  // T: O(n)
+  // S: O(1)
+  removeFromCountLruMap(nodeKey) {
+    const count = this.keyCountMap[nodeKey];
+    const evictedNode = this.countLruMap[count].removeNode(nodeKey)  // T: O(n)
+    this.removeCountLruMapEntryIfEmpty(count);
+    return evictedNode;
+  }
+
+  removeCountLruMapEntryIfEmpty(count) {
+    if (!this.countLruMap[count].head) {
+      // No items are left at count. Remove entry
+      delete this.countLruMap[count];
+    }
   }
 
   getValue(key) {
@@ -118,6 +160,103 @@ class LFUCache {
 
   setValue(key, value) {
     this.keyValueMap[key] = value;
+  }
+}
+
+class LinkedListNode {
+  constructor(key, next = null) {
+    this.key = key;
+    this.next = next;
+  }
+}
+
+class LinkedList {
+  constructor() {
+    this.head = null;
+  }
+
+  // T: O(1)
+  // S: O(1)
+  addToHead(node) {
+    if (this.head === null) {
+      this.head = node;
+    } else {
+      node.next = this.head;
+      this.head = node;
+    };
+  }
+
+  // T: O(1)
+  // S: O(1)
+  removeHead() {
+    const node = this.head;
+    if (node) {
+      if (node.next) {
+        this.head = node.next;
+        node.next = null;
+      } else {
+        // Only node in list
+        this.head = null;
+      }
+      return node;
+    }
+  }
+
+  // T: O(n)
+  // S: O(1)
+  removeTail() {
+    let node = this.head;
+    if (node) {
+      let nextNode = node.next;
+      if (nextNode) {
+        while (nextNode.next) {
+          node = node.next;
+          nextNode = nextNode.next;
+        }
+        node.next = null;
+        return nextNode;
+      } else {
+        // Only node in list
+        this.head = null;
+        return node;
+      }
+    }
+  }
+
+
+
+  // T: O(n)
+  // S: O(1)
+  getNode(key) {
+    let node = this.head;
+    while (node && node.key !== key) {
+      node = node.next;
+    }
+    return node;
+  }
+
+  // T: O(n)
+  // S: O(1)
+  removeNode(key) {
+    let node = this.head;
+    if (node) {
+      if (node.key === key) {
+        this.head = node.next;
+        node.next = null
+        return node;
+      }
+
+      let nextNode = node.next;
+      if (nextNode) {
+        while (nextNode.key !== key && nextNode.next) {
+          node = node.next;
+          nextNode = nextNode.next;
+        }
+        node.next = nextNode.next;
+        nextNode.next = null;
+        return nextNode;
+      }
+    }
   }
 }
 
@@ -144,15 +283,29 @@ const test2 = () => {
   console.log(result)
   console.log(`${51} expected`);
   cache.put(52, 52);
+
   cache.put(53, 53); // Cache overfull, remove LFU, tie in LFU w/ 50, 52 @ 1, w/ LRU = 50
+  result = cache.get(50);
+  console.log(result)
+  console.log(`${-1} expected`);
+
   cache.put(54, 54); // Cache overfull, remove LFU, tie in LFU w/ 52, 53 @ 1, w/ LRU = 52
+  result = cache.get(52);
+  console.log(result)
+  console.log(`${-1} expected`);
+
   result = cache.get(53);
   console.log(result)
   console.log(`${53} expected`);
+
   cache.put(55, 55); // Cache overfull, remove LFU = 54, which removes all of the lowest count items
-  result = cache.get(51);
+  result = cache.get(54);
   console.log(result)
   console.log(`${-1} expected`);
+
+  result = cache.get(51);
+  console.log(result)
+  console.log(`${51} expected`);
 }
 
 test1();
