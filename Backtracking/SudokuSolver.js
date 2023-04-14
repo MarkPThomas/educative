@@ -42,6 +42,9 @@ function isValid(board, nextCell, digit) {
   return true;
 }
 
+// T: O(9^(n*n)), For every unassigned index, there are 9 possible options so the time complexity
+// S: O(n*n), for storing board
+// where n = board dimension
 export function solveSudoku(board) {
   const nextCell = getNextEmptyCell(board);
 
