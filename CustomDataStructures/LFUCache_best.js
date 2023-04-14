@@ -70,7 +70,7 @@ class LFUCache {
     // LFU items, ties are handled through LRU
     const minCount = this.getMinCount(); // T: O(n)
     if (minCount !== Infinity) {
-      const evictedNode = this.removeLfuFromCountLruMap(minCount);
+      const evictedNode = this.removeLfuFromCountLruMap(minCount); // T: O(1)
       delete this.keyValueMap[evictedNode.key];
       delete this.keyCountMap[evictedNode.key];
 
