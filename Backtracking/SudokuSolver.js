@@ -29,10 +29,12 @@ export function solveSudoku(board) {
 
 const DIGITS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 const EMPTY = '.';
+const BLOCK_ROWS = 3;
+const BLOCK_COLS = 3;
 
 function getNextEmptyCell(board) {
   for (let row = 0; row < board.length; row++) {
-    for (let col = 0; col < board[0].length; col++) {
+    for (let col = 0; col < board[row].length; col++) {
       if (board[row][col] === EMPTY) {
         return { row, col };
       }
@@ -44,25 +46,25 @@ function isValid(board, nextCell, digit) {
   const { row, col } = nextCell;
 
   // Check row
-  for (let i = 0; i < board.length; i++) {
-    if (board[i][col] === digit) {
+  for (let trialRow = 0; trialRow < board.length; trialRow++) {
+    if (board[trialRow][col] === digit) {
       return false;
     }
   }
 
   // Check column
-  for (let j = 0; j < board[0].length; j++) {
-    if (board[row][j] === digit) {
+  for (let trialCol = 0; trialCol < board[row].length; trialCol++) {
+    if (board[row][trialCol] === digit) {
       return false;
     }
   }
 
   // Check block
-  let startCol = col - col % 3;
-  let startRow = row - row % 3;
-  for (let i = startRow; i < startRow + 3; i++) {
-    for (let j = startCol; j < startCol + 3; j++) {
-      if (board[i][j] === digit) {
+  let startRow = row - row % BLOCK_ROWS;
+  let startCol = col - col % BLOCK_COLS;
+  for (let trialRow = startRow; trialRow < startRow + BLOCK_ROWS; trialRow++) {
+    for (let trialCol = startCol; trialCol < startCol + BLOCK_COLS; trialCol++) {
+      if (board[trialRow][trialCol] === digit) {
         return false;
       }
     }
