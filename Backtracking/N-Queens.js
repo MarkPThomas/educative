@@ -9,11 +9,9 @@
 // 1 ≤ n ≤ 9
 
 
-import { Backtracking } from "./backtracking.js";
-
-// Tip: You may use some of the code templates provided
-// in the support files
-
+// T: O(n^n)
+// S: O(n)
+// where n = board dimension
 export function solveNQueens(n) {
   // For n queens in an nxn board, there are:
   // 1. 1 queen for each row
