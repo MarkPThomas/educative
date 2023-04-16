@@ -17,50 +17,20 @@
 // S: O(n) for both counter array & recursion stack
 // where n = total, m = # coin types available
 export function coinChange(coins, total) {
-  if (total < 1) {
-    // Base case that no coins are needed
-    return 0;
+  // Base case that no coins are valid
+  if (total < 0) {
+    return -1;
   }
 
   const counter = Array(total + 1).fill(Infinity);
-  return minCoins(total, counter, coins);
-}
+  counter[0] = 0;
 
-function minCoins(remainingSum, counter, coins) {
-  // Base cases
-  if (remainingSum === 0) {
-    // Case is complete
-    return 0;
+  for (let subTotal = 1; subTotal <= total; subTotal++) {
+    coins.forEach((coinValue) => {
+      if (coinValue <= subTotal) {
+        counter[subTotal] = Math.min(counter[subTotal], counter[subTotal - coinValue] + 1);
+      }
+    });
   }
-  if (remainingSum < 0) {
-    // Case determined to be unworkable.
-    // Backtrack by not including this result
-    return -1;
-  }
-  if (counter[remainingSum] !== Infinity) {
-    // Memoization
-    // Case already determined, no more modification needed
-    return counter[remainingSum];
-  }
-
-  // Set counter for current remaining sum
-  let currentMinCoins = Infinity;
-  coins.forEach((coin) => {
-    let result = minCoins(remainingSum - coin, counter, coins);
-    if (0 <= result && result < currentMinCoins) {
-      // +1 indicates the coin tested in the minCoins was able to be used for this remaining sum case, so is included in the current min count
-      currentMinCoins = result + 1;
-    }
-  });
-
-  // Memoization
-  if (currentMinCoins === Infinity) {
-    // Not possible to reach this sum case, as it was not updated
-    counter[remainingSum] = -1;
-  } else {
-    // Assign updated value to this sum case
-    counter[remainingSum] = currentMinCoins;
-  }
-
-  return counter[remainingSum];
+  return counter[total] > total ? -1 : counter[total];
 }
