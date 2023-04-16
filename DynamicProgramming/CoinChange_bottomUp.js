@@ -38,6 +38,7 @@ function minCoins(remainingSum, counter, coins) {
     return -1;
   }
   if (counter[remainingSum] !== Infinity) {
+    // Memoization
     // Case already determined, no more modification needed
     return counter[remainingSum];
   }
@@ -52,6 +53,7 @@ function minCoins(remainingSum, counter, coins) {
     }
   });
 
+  // Memoization
   if (currentMinCoins === Infinity) {
     // Not possible to reach this sum case, as it was not updated
     counter[remainingSum] = -1;
