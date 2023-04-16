@@ -3,9 +3,15 @@
 // S: O(n*n), for storing board
 // where n = board dimension
 function solveSudoku(board) {
-  const usedCoordsByDigit = getUsedCoordsByDigit(board);
+  let usedCoordsByDigit = getUsedCoordsByDigit(board);
+  let auditBoard = getUnusedCoordsByDigit(usedCoordsByDigit, board);
+  while (auditBoard.boardUpdated) {
+    usedCoordsByDigit = getUsedCoordsByDigit(board);
+    auditBoard = getUnusedCoordsByDigit(usedCoordsByDigit, board);
+  }
+  const unusedCoordsByDigit = auditBoard.unusedCoordsByDigit;
+
   const digitsByOrder = getDigitIndicesOrder(usedCoordsByDigit);
-  const unusedCoordsByDigit = getUnusedCoordsByDigit(usedCoordsByDigit, board.length, board[0].length);
   const firstDigitIndex = 0;
   const unusedRowsForDigit = Object.keys(unusedCoordsByDigit[digitsByOrder[firstDigitIndex]]);
 
@@ -86,13 +92,14 @@ function isInBox(row, col, usedCoord) {
 //	 }
 // }
 // where value = 1-9
-function getUnusedCoordsByDigit(usedCoordsByDigit, boardRowCount, boardColCount) {
+function getUnusedCoordsByDigit(usedCoordsByDigit, board) {
   const unusedCoordsByDigit = {};
+  let boardUpdated = false;
 
   for (const [digit, usedCoords] of Object.entries(usedCoordsByDigit)) {
     // Compile a list of row & column indices that do not have pre-filled values
-    const potentialRows = [...Array(boardRowCount).keys()];
-    const potentialCols = [...Array(boardColCount).keys()];
+    const potentialRows = [...Array(board.length).keys()];
+    const potentialCols = [...Array(board[0].length).keys()];
     usedCoords.forEach((usedCoord) => {
       potentialRows.splice(potentialRows.indexOf(usedCoord.row), 1);
       potentialCols.splice(potentialCols.indexOf(usedCoord.col), 1);
@@ -128,15 +135,20 @@ function getUnusedCoordsByDigit(usedCoordsByDigit, boardRowCount, boardColCount)
     }
     for (let potentialRow of potentialRows) {
       const potentialColsForRow = potentialColsReduced[potentialRow];
-      for (let potentialCol of potentialColsForRow) {
-        if (!unusedCoordsByDigit[digit].hasOwnProperty(potentialRow)) {
-          unusedCoordsByDigit[digit][potentialRow] = [];
+      if (potentialColsForRow.length === 1) {
+        board[potentialRow][potentialColsForRow[0]] = digit;
+        boardUpdated = true;
+      } else {
+        for (let potentialCol of potentialColsForRow) {
+          if (!unusedCoordsByDigit[digit].hasOwnProperty(potentialRow)) {
+            unusedCoordsByDigit[digit][potentialRow] = [];
+          }
+          unusedCoordsByDigit[digit][potentialRow].push(potentialCol);
         }
-        unusedCoordsByDigit[digit][potentialRow].push(potentialCol);
       }
     }
   }
-  return unusedCoordsByDigit;
+  return { unusedCoordsByDigit, boardUpdated };
 }
 
 function fillMatrix(digitIndex, rowIndex, unusedRowsForDigit, digitsByOrder, unusedCoordsByDigit, board) {
