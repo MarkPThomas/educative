@@ -19,11 +19,11 @@
 // T: O((m * n) * a(m * n)) -> O(m * n * 4) -> O(m * n)
 // S: O(m * n)
 // where m = # cols in a row, n = # of squares filled with water in 'cells' provided -> rows in the region if a path is assumed to be broken
-//       a = inverse Ackermann function, a very slow-growing function -> 4
+//       a = inverse Ackermann function, a very slow-growing function -> 4 where 4 =  # of directions to move in grid, relevant here because we used PATH COMPRESSION
 // NOTE: Normal brute force by using backtracking results in a time-complexity of T: O(4 * k * n * m^2) -> O(n^2 * m^2! 4 =  # of directions to move in grid, k = # days
 
 // Note: Files will not work with imports like this. Either bring in the structure or make this a module first!!!!
-import UnionFind from '../Common/union_find_crossings.js'
+import UnionFind from '../Common/union_find_crossings'
 
 function lastDayToCross(row, col, cells) {
   const LAND = 0;
