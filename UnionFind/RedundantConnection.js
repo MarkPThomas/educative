@@ -24,7 +24,7 @@
 // T: O(n)
 // S: O(n)
 // where n = # edges
-import UnionFind from './union_find.js'
+import UnionFind from './union_find_connections.js'
 
 export function redundantConnection(edges) {
   const connections = new UnionFind(edges.length);

@@ -10,6 +10,8 @@
 // T: O(m*n)
 // S: O(m*n)
 // where m = grid width, n = grid height
+import UnionFind from './union_find_islands.js'
+
 function numIslands(grid) {
   let count = 0;
   for (let row = 0; row < grid.length; row++) {
