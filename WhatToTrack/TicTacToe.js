@@ -35,48 +35,34 @@ class TicTacToe {
   // T: O(n)
   // S: O(n)
   constructor(n) {
-    this.n = n;
+    this.rows = Array(n).fill(0);
+    this.cols = Array(n).fill(0);
+    this.diagonal = 0;
+    this.antiDiagonal = 0;
     this.movesPlayed = 0;
-    this.player1 = {
-      rows: Array(n).fill(0),
-      cols: Array(n).fill(0),
-      diagonal: 0,
-      antiDiagonal: 0
-    }
-    this.player2 = {
-      rows: Array(n).fill(0),
-      cols: Array(n).fill(0),
-      diagonal: 0,
-      antiDiagonal: 0
-    }
   }
 
   // T: O(1)
   // S: O(1)
   move(row, col, player) {
-    function updateBoard(row, col, board, n) {
-      board.cols[col]++;
-      board.rows[row]++;
-      if (row === col) {
-        board.diagonal++;
-      } else if (row === n - 1 - col) {
-        board.antidiagonal++;
-      }
-    }
+    // Use these values to work out balance of scores as this is a zero-sum game
+    const currentPlayer = player === 1 ? 1 : -1;
+    this.cols[col] += currentPlayer;
+    this.rows[row] += currentPlayer;
 
-    function isWinning(row, col, board, n) {
-      return board.cols[col] === n
-        || board.rows[row] === n
-        || board.diagonal === n
-        || board.antidiagonal === n;
+    const n = this.rows.length;
+    if (row === col) {
+      this.diagonal += currentPlayer;
+    } else if (row === n - 1 - col) {
+      this.antidiagonal += currentPlayer;
     }
-
-    const playerBoard = player === 1 ? this.player1 : this.player2;
-    updateBoard(row, col, playerBoard, this.n);
 
     this.movesPlayed++;
-    if (this.movesPlayed >= 2 * this.n - 1) {
-      return isWinning(row, col, playerBoard, this.n) ? player : 0;
+    if (this.movesPlayed >= 2 * n - 1) {
+      return (Math.abs(this.cols[col]) === n
+        || Math.abs(this.rows[row]) === n
+        || Math.abs(this.diagonal) === n
+        || Math.abs(this.antidiagonal) === n) ? player : 0;
     } else {
       return 0;
     }
