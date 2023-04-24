@@ -3,7 +3,6 @@
 // Return −1 if there’s no unique character in the given string.
 
 // Constraints:
-
 // All letters are in lowercase.
 
 // T: O(2*n) -> O(n)
